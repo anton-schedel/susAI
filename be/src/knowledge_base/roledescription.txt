@@ -1,0 +1,56 @@
+SENIOR FULL-STACK DEVELOPER
+Company: TechFlow GmbH
+Location: Munich, Germany (Hybrid - 3 days onsite)
+Employment Type: Full-time, Permanent
+
+ABOUT THE ROLE
+We are looking for a Senior Full-Stack Developer to join our Platform Engineering team. You will be responsible for designing, developing, and maintaining our core SaaS platform serving 50,000+ enterprise users.
+
+REQUIRED QUALIFICATIONS
+- 5+ years of professional software development experience
+- Strong proficiency in TypeScript and Node.js
+- Experience with React.js and modern frontend frameworks
+- Hands-on experience with PostgreSQL and Redis
+- Experience designing and building RESTful APIs
+- Familiarity with microservices architecture
+- Experience with Docker and Kubernetes
+- Knowledge of CI/CD pipelines (GitHub Actions, GitLab CI, or similar)
+- Experience with cloud platforms (AWS preferred, Azure or GCP acceptable)
+- Strong understanding of software testing (unit, integration, e2e)
+
+NICE TO HAVE
+- Experience with GraphQL
+- Knowledge of event-driven architecture (Kafka, RabbitMQ)
+- Experience with Terraform or other IaC tools
+- Contributions to open-source projects
+- Experience mentoring junior developers
+
+KEY RESPONSIBILITIES
+- Design and implement new features for our platform
+- Write clean, maintainable, and well-tested code
+- Participate in code reviews and architectural discussions
+- Collaborate with product managers and designers
+- Troubleshoot production issues and implement fixes
+- Contribute to technical documentation
+- Mentor junior team members
+
+TECH STACK
+- Frontend: React, TypeScript, TailwindCSS, Vite
+- Backend: Node.js, Express, TypeScript
+- Database: PostgreSQL, Redis
+- Infrastructure: AWS (ECS, RDS, ElastiCache, S3), Docker, Kubernetes
+- Monitoring: Datadog, PagerDuty
+- CI/CD: GitHub Actions
+
+WHAT WE OFFER
+- Competitive salary (€75,000 - €95,000 based on experience)
+- 30 days vacation
+- Home office equipment budget
+- Professional development budget (€2,000/year)
+- Team events and offsites
+
+INTERVIEW PROCESS
+1. Initial HR screening (30 min)
+2. Technical interview with engineering team (60 min)
+3. System design interview (45 min)
+4. Culture fit with team lead (30 min)

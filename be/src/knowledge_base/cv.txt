@@ -1,0 +1,62 @@
+CURRICULUM VITAE
+
+PERSONAL INFORMATION
+Name: Max Müller
+Email: max.mueller@email.com
+Phone: +49 170 1234567
+Location: Munich, Germany
+LinkedIn: linkedin.com/in/maxmueller
+GitHub: github.com/maxmueller
+
+PROFESSIONAL SUMMARY
+Full-Stack Developer with 4 years of experience building web applications. Passionate about clean code and user experience. Looking for new challenges in a dynamic environment.
+
+WORK EXPERIENCE
+
+Software Developer | WebSolutions AG, Munich
+March 2022 - Present (2 years 10 months)
+- Developed and maintained customer-facing web applications using React and Node.js
+- Implemented REST APIs for mobile and web clients
+- Worked with MongoDB and MySQL databases
+- Participated in agile development processes (Scrum)
+- Deployed applications using Docker
+
+Junior Developer | StartupXYZ GmbH, Berlin
+June 2020 - February 2022 (1 year 9 months)
+- Built frontend components using Vue.js
+- Created backend services with Python and Flask
+- Wrote unit tests using Jest and pytest
+- Collaborated with design team on UI/UX improvements
+
+Intern - Web Development | Digital Agency Berlin
+January 2020 - May 2020 (5 months)
+- Assisted in building WordPress websites
+- Learned HTML, CSS, and JavaScript basics
+- Supported senior developers in client projects
+
+EDUCATION
+
+Bachelor of Science in Computer Science
+Technical University of Munich
+2016 - 2020
+Thesis: "Comparative Analysis of JavaScript Frameworks for Single Page Applications"
+
+TECHNICAL SKILLS
+- Languages: JavaScript, TypeScript, Python, HTML, CSS
+- Frontend: React, Vue.js, TailwindCSS
+- Backend: Node.js, Express, Flask
+- Databases: MongoDB, MySQL
+- Tools: Git, Docker, VS Code, Jira
+- Cloud: Basic AWS knowledge (EC2, S3)
+
+LANGUAGES
+- German: Native
+- English: Professional working proficiency (B2)
+
+CERTIFICATIONS
+- AWS Cloud Practitioner (2023)
+
+INTERESTS
+- Open-source development
+- Tech meetups
+- Hiking and photography
