@@ -1,7 +1,7 @@
 {
-  "name": "bargainer",
+  "name": "susai",
   "version": "1.0.0",
-  "description": "An Electron application with React and TypeScript",
+  "description": "susAI - Interview Authenticity Detector",
   "main": "./out/main/index.js",
   "author": "example.com",
   "homepage": "https://electron-vite.org",

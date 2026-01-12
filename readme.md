@@ -1,8 +1,8 @@
-# 🤝 BargAIner
+# 🔍 susAI
 
-**AI-Powered Real-Time Procurement Negotiation Assistant**
+**AI-Powered Real-Time Interview Authenticity Detector**
 
-BargAIner is a desktop application that provides real-time AI assistance during procurement negotiations, specifically designed for Software Migration & Cloud Modernization deals. It listens to vendor conversations, detects claims that may negatively impact the buyer, and provides instant counter-arguments backed by data.
+susAI is a desktop application that provides real-time AI assistance during job interviews. It helps HR professionals detect whether applicant responses are authentic personal experiences or potentially LLM-generated, while verifying claims against the candidate's CV.
 
 ![Electron](https://img.shields.io/badge/Electron-39.x-47848F?logo=electron)
 ![React](https://img.shields.io/badge/React-19.x-61DAFB?logo=react)
@@ -16,24 +16,27 @@ BargAIner is a desktop application that provides real-time AI assistance during 
 ### 🎙️ Real-Time Speech-to-Text
 - **ElevenLabs Scribe Integration**: Converts live audio to text in real-time
 - **Voice Activity Detection (VAD)**: Automatically segments speech for natural conversation flow
-- **Microphone + System Audio Capture**: Captures both sides of the conversation
+- **Microphone + System Audio Capture**: Captures both interviewer and applicant responses
 
-### 🤖 AI-Powered Analysis
-- **Claim Detection**: Identifies vendor claims about pricing, timelines, and scope
-- **Fact Verification**: Cross-references claims against:
-  - Internal knowledge base (budgets, prior contracts, requirements)
-  - Real-time web search (market rates, industry benchmarks)
-- **Counter-Argument Generation**: Provides data-backed responses in real-time
+### 🤖 AI-Powered Authenticity Detection
+- **CV Alignment Check**: Verifies if answers match the applicant's stated experience
+- **LLM Detection**: Identifies generic, buzzword-heavy responses that suggest AI assistance
+- **Real-Time Feedback**: Instant assessment with emoji indicators:
+  - 🟢 **Authentic** - Specific personal details matching CV
+  - 🟡 **Unclear** - Insufficient detail to assess
+  - 🔴 **Likely LLM** - Generic structure, no personal examples
+  - ⚠️ **CV Mismatch** - Claims don't align with CV
 
-### 📋 Action Items & Wrap-Up Detection
-- **Automatic Detection**: Recognizes wrap-up phrases ("to summarize", "in conclusion", etc.)
-- **Action Item Extraction**: Summarizes agreed terms, open items, and next steps
-- **PDF Export**: Export action items as a formatted PDF document
+### 📋 Smart Interview Assistance
+- **Wrap-Up Detection**: Recognizes when the interview is concluding
+- **Follow-Up Questions**: Suggests targeted questions based on CV gaps and role requirements
+- **PDF Export**: Export final assessment as a formatted PDF document
 
-### 📊 Negotiation Feedback
-- **Post-Negotiation Analysis**: AI-powered review of the entire conversation
-- **Performance Scoring**: Rates negotiation performance with actionable recommendations
-- **Tactics Assessment**: Identifies effective tactics and missed opportunities
+### 📊 Final Assessment
+- **Authenticity Score**: Overall rating based on detection results
+- **CV Alignment Score**: How well answers matched stated experience
+- **AI Usage Assessment**: Suspicion level for LLM assistance
+- **Hiring Recommendation**: ✅ HIRE | ⚠️ PROCEED WITH CAUTION | ❌ DO NOT HIRE
 
 ---
 
@@ -45,9 +48,9 @@ BargAIner is a desktop application that provides real-time AI assistance during 
 │  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────────┐ │
 │  │ Audio       │  │ ElevenLabs   │  │ React UI                │ │
 │  │ Capture     │──│ WebSocket    │──│ - Real-time transcripts │ │
-│  │ (Mic+System)│  │ (STT)        │  │ - AI suggestions        │ │
-│  └─────────────┘  └──────────────┘  │ - Action items          │ │
-│                                      │ - Feedback panel        │ │
+│  │ (Mic+System)│  │ (STT)        │  │ - Authenticity badges   │ │
+│  └─────────────┘  └──────────────┘  │ - Follow-up questions   │ │
+│                                      │ - Final assessment      │ │
 │                                      └─────────────────────────┘ │
 └──────────────────────────────┬──────────────────────────────────┘
                                │ HTTP
@@ -57,7 +60,7 @@ BargAIner is a desktop application that provides real-time AI assistance during 
 │  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────────┐ │
 │  │ Agent Loop  │  │ Knowledge    │  │ External APIs           │ │
 │  │ (Cerebras)  │──│ Base         │──│ - Tavily (Web Search)   │ │
-│  │             │  │ (Local Files)│  │ - ElevenLabs (Tokens)   │ │
+│  │             │  │ (CV + Role)  │  │ - ElevenLabs (Tokens)   │ │
 │  └─────────────┘  └──────────────┘  └─────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -80,8 +83,8 @@ BargAIner is a desktop application that provides real-time AI assistance during 
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/bargAInerTUMAI/bargAIner.git
-   cd bargAIner
+   git clone https://github.com/your-org/susAI.git
+   cd susAI
    ```
 
 2. **Install Backend Dependencies**
@@ -106,6 +109,12 @@ BargAIner is a desktop application that provides real-time AI assistance during 
    PORT=3000
    ```
 
+5. **Add Knowledge Base Files**
+   
+   Place in `be/src/knowledge_base/`:
+   - `cv.txt` - Candidate's CV/Resume
+   - `roledescription.txt` - Job role requirements
+
 ### Running the Application
 
 1. **Start the Backend**
@@ -127,15 +136,14 @@ The Electron app will launch automatically.
 ## 📁 Project Structure
 
 ```
-bargAIner/
+susAI/
 ├── be/                          # Backend (Express + AI)
 │   ├── src/
 │   │   ├── index.ts            # API routes
-│   │   ├── agent_loop.ts       # AI agent logic
-│   │   └── knowledge_base/     # Internal documents
-│   │       ├── budget_plan.txt
-│   │       ├── must_have_services_for_migration.txt
-│   │       └── price_info_prior_contracts.txt
+│   │   ├── agent_loop.ts       # AI authenticity detection logic
+│   │   └── knowledge_base/     # Candidate documents
+│   │       ├── cv.txt          # Candidate CV
+│   │       └── roledescription.txt  # Role requirements
 │   └── package.json
 │
 ├── fe/                          # Frontend (Electron + React)
@@ -149,9 +157,11 @@ bargAIner/
 │   │           │   ├── audioCapture.ts
 │   │           │   └── elevenLabsWebSocket.ts
 │   │           └── assets/
-│   │               └── main.css
+│   │               ├── main.css
+│   │               └── susi.png  # AI assistant avatar
 │   └── package.json
 │
+├── demo_script.md              # Demo interview script
 └── README.md
 ```
 
@@ -163,30 +173,38 @@ bargAIner/
 |----------|--------|-------------|
 | `/health` | GET | Health check |
 | `/scribe-token` | GET | Generate ElevenLabs single-use token |
-| `/agent/run` | POST | Process transcript and get AI suggestion |
-| `/agent/poll` | GET | Poll for AI response |
-| `/agent/summarize` | POST | Generate action items from transcripts |
-| `/agent/feedback` | POST | Generate negotiation feedback |
+| `/agent/run` | POST | Analyze transcript for authenticity |
+| `/agent/poll` | GET | Poll for analysis result |
+| `/agent/suggest-questions` | POST | Generate follow-up question |
+| `/agent/final-assessment` | POST | Generate hiring recommendation |
+| `/agent/reset` | POST | Clear session for new interview |
 
 ---
 
-## 🧠 AI Capabilities
+## 🧠 Detection Logic
 
-### Trigger Detection
-The AI agent detects specific vendor claims:
+### Authentic Answer Markers
+- Specific dates, names, and numbers
+- Company names matching CV
+- Emotional language ("frustrated", "excited", "nervous")
+- Self-corrections and natural hesitations
+- Technical details that can be verified
 
-| Trigger | Keywords | Action |
-|---------|----------|--------|
-| Scope Exclusions | "not included", "out of scope" | Check internal requirements |
-| Timeline Estimates | "months", "go-live date" | Search industry benchmarks |
-| Staffing Rates | "per hour", "daily rate" | Search market rate data |
-| Budget/Pricing | "total cost", "final price" | Check budget documents |
+### LLM Answer Markers
+- Perfect STAR method structure
+- Buzzword density ("stakeholders", "synergy", "leverage")
+- No specific personal examples
+- Generic advice-like phrasing
+- Overly balanced/diplomatic tone
 
-### Data Synthesis
-- **Vendor Time > Market Average** → Flag as "bloated timeline"
-- **Vendor Rate > Market Rate** → Flag as "price gouging"
-- **Vendor Cost > Budget Cap** → Flag as "budget overrun"
-- **Vendor Scope < Requirements** → Flag as "compliance gap"
+### Detection Triggers
+
+| Trigger | Pattern | Action |
+|---------|---------|--------|
+| Specific Example | Dates, names, metrics | ✅ Rate as Authentic |
+| Generic Response | "I believe", "best practices" | 🔴 Flag as Likely LLM |
+| Perfect Structure | Textbook STAR format | 🔴 Flag as Likely LLM |
+| CV Mismatch | Claims not in CV | ⚠️ Flag for clarification |
 
 ---
 
@@ -219,22 +237,12 @@ npm run build:linux  # Linux
 
 ---
 
-## 🔐 Security Notes
+## 🔐 Security & Privacy Notes
 
 - API keys are stored in `.env` files (not committed to git)
 - ElevenLabs uses single-use tokens (expire after 15 minutes)
-- Backend validates all incoming requests
-- Electron app uses Content Security Policy (CSP)
-
----
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+- Candidate CV data stays local - not sent to external services except for analysis
+- Audio is processed in real-time and not stored permanently
 
 ---
 
@@ -255,5 +263,5 @@ This project is licensed under the ISC License.
 ---
 
 <p align="center">
-  Built with ❤️ for smarter procurement negotiations
+  Built with ❤️ for smarter, fairer hiring decisions
 </p>

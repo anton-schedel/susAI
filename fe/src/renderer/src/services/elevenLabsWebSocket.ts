@@ -16,21 +16,48 @@ export interface ElevenLabsWebSocketCallbacks {
   onClose?: () => void
 }
 
-// Wrap-up phrases that indicate meeting is concluding
+// Wrap-up phrases that indicate interviewer is concluding (triggers suggested questions)
 const WRAP_UP_PHRASES = [
+  // Summary phrases
   'to summarize',
   'in summary',
-  'at the end',
-  'in conclusion',
-  'wrapping up',
-  'to conclude',
-  'let me summarize',
-  'final thoughts',
-  'before we end',
-  'to wrap up',
-  'closing thoughts',
   'to sum up',
-  'in closing'
+  'let me summarize',
+  // Conclusion phrases
+  'in conclusion',
+  'to conclude',
+  'conclude',
+  // Wrap-up phrases
+  'wrapping up',
+  'wrap up',
+  'wrap this up',
+  'wrap things up',
+  'to wrap up',
+  // Ending phrases
+  'winding down',
+  'wind things up',
+  'final thoughts',
+  'closing thoughts',
+  'in closing',
+  'before we end',
+  'at the end',
+  'end of the interview',
+  'end here',
+  'end the interview',
+  'should end',
+  'let\'s end',
+  'we should end',
+  'we can end',
+  'that\'s all for today',
+  // Question/next steps
+  'any questions',
+  'any final questions',
+  'that\'s all the questions',
+  'thank you for your time',
+  'thanks for your time',
+  'we\'ll be in touch',
+  'next steps',
+  'closing out'
 ]
 
 export class ElevenLabsWebSocket {

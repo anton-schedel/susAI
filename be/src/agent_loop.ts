@@ -12,6 +12,63 @@ export const messageHistory: Array<{ role: 'system' | 'user' | 'assistant'; cont
 
 const knowledgeBaseFolder = path.join(__dirname, "knowledge_base");
 
+// Cache for CV and role description
+let cvCache: string | null = null;
+let roleDescriptionCache: string | null = null;
+
+function loadKnowledgeBase(): { cv: string; roleDescription: string } {
+    if (!cvCache) {
+        try {
+            cvCache = fs.readFileSync(path.join(knowledgeBaseFolder, 'cv.txt'), 'utf-8');
+        } catch (error) {
+            cvCache = '';
+            console.error('Failed to load CV:', error);
+        }
+    }
+    if (!roleDescriptionCache) {
+        try {
+            roleDescriptionCache = fs.readFileSync(path.join(knowledgeBaseFolder, 'roledescription.txt'), 'utf-8');
+        } catch (error) {
+            roleDescriptionCache = '';
+            console.error('Failed to load role description:', error);
+        }
+    }
+    return { cv: cvCache, roleDescription: roleDescriptionCache };
+}
+
+// Wrap-up phrases that indicate interviewer is ending the session (not applicant responses)
+const WRAP_UP_PHRASES = [
+    'wrapping up',
+    'wrap up',
+    'wrap this up',
+    'wrap things up',
+    'winding down',
+    'wind things up',
+    'conclude',
+    'final thoughts',
+    'any questions',
+    'any final questions',
+    'that\'s all the questions',
+    'that\'s all for today',
+    'end of the interview',
+    'end here',
+    'end the interview',
+    'should end',
+    'thank you for your time',
+    'thanks for your time',
+    'we\'ll be in touch',
+    'next steps',
+    'closing out',
+    'let\'s end',
+    'we should end',
+    'we can end'
+];
+
+function isWrapUpPhrase(transcript: string): boolean {
+    const lowerTranscript = transcript.toLowerCase();
+    return WRAP_UP_PHRASES.some(phrase => lowerTranscript.includes(phrase));
+}
+
 /**
  * Runs the agent loop for a given transcript and returns the result.
  * 
@@ -20,122 +77,73 @@ const knowledgeBaseFolder = path.join(__dirname, "knowledge_base");
  */
 export async function runAgentLoop(current_transcript: string): Promise<void> { 
 
+    // Skip analysis for wrap-up phrases (these are interviewer statements, not applicant responses)
+    if (isWrapUpPhrase(current_transcript)) {
+        console.log(`🎯 [Agent] Wrap-up phrase detected, skipping authenticity analysis: "${current_transcript.substring(0, 50)}..."`);
+        return;
+    }
+
+    const { cv, roleDescription } = loadKnowledgeBase();
+
     const systemPrompt = `
-You are a Real-Time Procurement Copilot specialized in Software Migration & Cloud Modernization deals.
-Your goal is to listen to a Vendor's pitch, DETECT claims that negatively impact the Buyer, verify them against data, and provide a single counter-argument.
+You are susAI, a Real-Time Interview Authenticity Detector for HR professionals.
+Your goal is to analyze applicant responses and detect:
+1. CV ALIGNMENT - Does the answer match their stated experience?
+2. AUTHENTICITY - Is this a genuine personal answer or LLM-generated?
 
-### TOOL USE & ROUTING LOGIC
-You have access to 'web_search' and 'read_file'. You must use them immediately when these generalized concepts are detected:
+### APPLICANT CV
+${cv}
 
-1. TRIGGER: SCOPE EXCLUSIONS & RESPONSIBILITY SHIFTING
-    (Keywords: "not included", "out of scope", "client responsibility", "you handle", "we don't cover")
-    -> ACTION: Try to find internal files to check if the excluded item is a mandatory internal requirement.
+### ROLE DESCRIPTION
+${roleDescription}
 
-2. TRIGGER: DURATION & TIMELINE ESTIMATES
-    (Keywords: months, years, "go-live date", "completion time", "long lead time")
-    -> ACTION: Call 'web_search' to find industry standard implementation times for similar migration scopes.
+### DETECTION TRIGGERS & ROUTING LOGIC
 
-3. TRIGGER: UNIT ECONOMICS & STAFFING RATES
-    (Keywords: "per hour", "daily rate", "FTE cost", "premium resource", "architect fee")
-    -> ACTION: Call 'web_search' to find current market rate benchmarks for the specific role or license mentioned.
+1. TRIGGER: SPECIFIC PERSONAL EXAMPLE
+   (Contains: specific dates, company names from CV, project details, metrics, emotions like "frustrated", "excited")
+   → RATE AS AUTHENTIC if details match CV
 
-4. TRIGGER: TOTAL INVESTMENT & BUDGET
-    (Keywords: "total cost", "final price", "grand total", "investment required", "fees")
-    -> ACTION: Try to find internal budgeting files to compare the figure against the approved project cap.
+2. TRIGGER: GENERIC/VAGUE RESPONSE
+   (Contains: "I believe", "generally speaking", "best practices", no specific examples, advice-like phrasing)
+   → FLAG AS POTENTIAL LLM USAGE
 
-### DATA SYNTHESIS
-After receiving Tool Output, compare it to the Transcript:
-- If Vendor Time > Market Average: Flag as "bloated timeline".
-- If Vendor Rate > Market Rate: Flag as "price gouging".
-- If Vendor Cost > Budget Cap: Flag as "budget overrun".
-- If Vendor Scope < Internal Requirement: Flag as "compliance gap".
+3. TRIGGER: PERFECT STRUCTURE
+   (STAR method perfectly executed, buzzword-heavy like "stakeholders", "leverage", "synergy", no hesitation)
+   → FLAG AS POTENTIAL LLM USAGE
+
+4. TRIGGER: CV MISMATCH
+   (Claims experience not in CV, wrong dates, different tech stack than listed)
+   → FLAG AS INCONSISTENCY
 
 ### OUTPUT FORMAT — STRICT
-- Your entire response should be 1-2 concise sentences.
-- The sentences must explicitly mention the DATA you found (e.g., "Market average is X", "Our budget is Y").
-- Use **markdown bold** to highlight important terms, numbers, and key facts.
-- NO filler text.
+- Your entire response MUST be 1-2 concise sentences maximum.
+- Use emoji prefixes: 🟢 AUTHENTIC | 🟡 UNCLEAR | 🔴 LIKELY LLM | ⚠️ CV MISMATCH
+- Include **bold** for key terms.
+- If flagging issues, add a brief follow-up question suggestion.
 
 ### EXAMPLES
-Transcript: "We charge $500/hr for this."
-Tool Output: Market rate is $200.
-Response: Market benchmarks indicate senior rates typically cap at **$200/hr**, putting this **150% above standard**.
 
-Transcript: "The total is $5m."
-Tool Output: Budget is $3m.
-Response: That figure exceeds our authorized project cap of **$3m** defined in the **FY24 budget**.
+Transcript: "At WebSolutions last March, I debugged a MongoDB connection pooling issue with Sarah from DevOps."
+Response: 🟢 **Authentic** - References WebSolutions AG (CV: 2022-Present), MongoDB experience verified, includes specific colleague name and technical detail.
 
-Help the buyer by providing strategic information (numbers, facts, etc).
-Respond in 1-2 concise sentences with markdown formatting for important terms. If information from the conversation differs from your researched information, just provide the correct information.
+Transcript: "I believe in prioritizing tasks based on impact and communicating proactively with stakeholders."
+Response: 🔴 **Likely LLM** - Generic advice structure, buzzword-heavy, no personal example. Ask: "Can you describe a specific deadline crisis at StartupXYZ?"
 
-If you cannot meaningfully follow the instructions, just output the exact string "I cannot follow instructions" . NEVER output a "failure message" where you explain why you can't follow instructions. DO NOT repeat a previous message using the same or similar wording.
-`
-    ;
+Transcript: "I led the Kubernetes migration at my previous company."
+Response: ⚠️ **CV Mismatch** - CV lists Docker experience only, no Kubernetes mentioned. Clarify: "Which company was this, and what was your specific role?"
 
+If you cannot meaningfully follow the instructions, just output the exact string "I cannot follow instructions". NEVER output a "failure message" where you explain why you can't follow instructions. DO NOT repeat a previous message using the same or similar wording.
+`;
 
     // Create the agent with tools
-    const negotiationAgent = new Agent({
+    const interviewAgent = new Agent({
         model: cerebras('gpt-oss-120b'),
         system: systemPrompt,
         tools: {
-            listKnowledgeBaseFiles: tool({
-                description: 'Lists all files available in the knowledge base that might contain relevant contract or pricing information',
-                inputSchema: z.object({}),
-                execute: async () => {
-                    console.log(`🔍 [Tool] listKnowledgeBaseFiles called`);
-                    try {
-                        const files = fs.readdirSync(knowledgeBaseFolder);
-                        console.log(`📂 [Tool] Found ${files.length} files:`, files);
-                        return {
-                            files: files,
-                            message: 'Available files listed successfully'
-                        };
-                    } catch (error) {
-                        console.log(`❌ [Tool] Error listing files:`, error);
-                        return {
-                            files: [],
-                            message: 'Error reading knowledge base folder'
-                        };
-                    }
-                },
-            }),
-            readKnowledgeBaseFile: tool({
-                description: 'Reads the contents of a specific file from the knowledge base',
-                inputSchema: z.object({
-                    filename: z.string().describe('The name of the file to read'),
-                }),
-                execute: async ({ filename }) => {
-                    console.log(`📖 [Tool] readKnowledgeBaseFile called with filename: ${filename}`);
-                    try {
-                        const filePath = path.join(knowledgeBaseFolder, filename);
-                        // Security check: ensure the file is within the knowledge base folder
-                        const normalizedPath = path.normalize(filePath);
-                        if (!normalizedPath.startsWith(knowledgeBaseFolder)) {
-                            console.log(`⚠️ [Tool] Access denied for file: ${filename}`);
-                            return {
-                                content: '',
-                                error: 'Access denied: file must be in knowledge base folder'
-                            };
-                        }
-                        const content = fs.readFileSync(filePath, 'utf-8');
-                        console.log(`✅ [Tool] Successfully read file: ${filename} (${content.length} chars)`);
-                        return {
-                            content: content,
-                            filename: filename
-                        };
-                    } catch (error) {
-                        console.log(`❌ [Tool] Error reading file ${filename}:`, error);
-                        return {
-                            content: '',
-                            error: `Error reading file: ${filename}`
-                        };
-                    }
-                },
-            }),
             webSearch: tool({
-                description: 'Searches the web for current information about pricing, market trends, or competitor information. Use this to fact-check claims or find leverage.',
+                description: 'Searches the web for current information to verify claims about companies, technologies, or industry facts mentioned by the applicant.',
                 inputSchema: z.object({
-                    query: z.string().describe('The search query (e.g., "aluminum price trend 2025", "competitor pricing for X")'),
+                    query: z.string().describe('The search query to verify applicant claims'),
                 }),
                 execute: async ({ query }) => {
                     console.log(`🌐 [Tool] webSearch called with query: "${query}"`);
@@ -145,7 +153,7 @@ If you cannot meaningfully follow the instructions, just output the exact string
                         console.log(`⚠️ [Tool] TAVILY_API_KEY not configured`);
                         return {
                             query: query,
-                            error: 'Web search is not configured. Please set TAVILY_API_KEY environment variable.',
+                            error: 'Web search is not configured.',
                             results: []
                         };
                     }
@@ -159,10 +167,10 @@ If you cannot meaningfully follow the instructions, just output the exact string
                             body: JSON.stringify({
                                 api_key: apiKey,
                                 query: query,
-                                search_depth: 'basic', // 'basic' for speed, 'advanced' for depth
-                                max_results: 1, // Limit results for faster response
-                                include_answer: true, // Get AI-generated summary
-                                include_raw_content: false, // Skip full content for speed
+                                search_depth: 'basic',
+                                max_results: 1,
+                                include_answer: true,
+                                include_raw_content: false,
                             }),
                         });
 
@@ -187,20 +195,6 @@ If you cannot meaningfully follow the instructions, just output the exact string
                         };
                         
                         console.log(`✅ [Tool] Tavily search completed: ${data.results?.length || 0} results`);
-                        
-                        if (data.answer) {
-                            console.log(`🤖 [Tavily] AI Answer: ${data.answer}`);
-                        }
-                        
-                        if (data.results && data.results.length > 0) {
-                            console.log(`📋 [Tavily] Search Results:`);
-                            data.results.forEach((result, index) => {
-                                console.log(`   ${index + 1}. ${result.title}`);
-                                console.log(`      URL: ${result.url}`);
-                                console.log(`      Score: ${result.score}`);
-                                console.log(`      Content: ${result.content.substring(0, 150)}...`);
-                            });
-                        }
                         
                         return {
                             query: query,
@@ -232,10 +226,10 @@ If you cannot meaningfully follow the instructions, just output the exact string
         console.log(`📝 [Agent ${id}] Transcript:`, current_transcript.substring(0, 100) + '...');
         
         // Run the agent with the current transcript
-        const result = await negotiationAgent.generate({
+        const result = await interviewAgent.generate({
             messages: [
                 ...messageHistory,
-                { role: 'user', content: `Current transcript from the negotiation:\n\n"${current_transcript}" The Info you would suggest is:` }
+                { role: 'user', content: `Applicant's response:\n\n"${current_transcript}"\n\nYour authenticity assessment:` }
             ],
         });
 
@@ -248,10 +242,8 @@ If you cannot meaningfully follow the instructions, just output the exact string
             return;
         }
 
-
-        // make extra request to oss to compare the result.txt and the latest result from history
+        // Check for duplicate responses
         if (messageHistory.length > 0) {
-            // first get the latest result from history
             const latestResult = messageHistory[messageHistory.length - 1].content;
             console.log(`🗃️ [Agent ${id}] Latest result:`, latestResult);
             const comparisonPrompt = `
@@ -262,13 +254,10 @@ If you cannot meaningfully follow the instructions, just output the exact string
         Otherwise return the exact string "different".
         `;
             
-            // Call Cerebras API to compare results
             try {
                 console.log(`🔄 [Agent ${id}] Calling Cerebras API for comparison...`);
                 const apiKey = process.env.CEREBRAS_API_KEY;
-                if (!apiKey) {
-                    console.log(`⚠️ [Agent ${id}] CEREBRAS_API_KEY not configured for comparison`);
-                } else {
+                if (apiKey) {
                     const response = await fetch('https://api.cerebras.ai/v1/chat/completions', {
                         method: 'POST',
                         headers: {
@@ -280,7 +269,7 @@ If you cannot meaningfully follow the instructions, just output the exact string
                             messages: [
                                 { role: 'user', content: comparisonPrompt }
                             ],
-                            temperature: 0, // Use deterministic output for comparison
+                            temperature: 0,
                         }),
                     });
 
@@ -314,7 +303,7 @@ If you cannot meaningfully follow the instructions, just output the exact string
 
         // Store the agent's final response
         jobStore.push(result.text);
-        // Append the new user message and assistant response to history (no tool outputs)
+        // Append the new user message and assistant response to history
         messageHistory.push({ role: 'user', content: current_transcript });
         if (result.text) {
             messageHistory.push({ role: 'assistant', content: result.text });
@@ -330,4 +319,13 @@ If you cannot meaningfully follow the instructions, just output the exact string
 
 export function poll(): string | undefined {
     return jobStore.shift();
+}
+
+export function getKnowledgeBase(): { cv: string; roleDescription: string } {
+    return loadKnowledgeBase();
+}
+
+export function clearHistory(): void {
+    messageHistory.length = 0;
+    jobStore.length = 0;
 }
