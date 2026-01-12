@@ -103,10 +103,13 @@ code {
   gap: 2px;
 }
 
-.susi-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.95);
+.susi-logo {
+  height: 24px;
+  width: 80px;
+  object-fit: cover;
+  object-position: center;
+  transform: scale(2.5) translateX(-2px);
+  transform-origin: center;
 }
 
 .susi-role {

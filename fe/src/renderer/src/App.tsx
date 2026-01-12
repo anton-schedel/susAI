@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown'
 import { AudioCapture, AudioData } from './services/audioCapture'
 import { ElevenLabsWebSocket } from './services/elevenLabsWebSocket'
 import susiAvatar from './assets/susi.png'
+import susAILogo from './assets/susAILogo.png'
 
 const BACKEND_URL = 'http://localhost:3000'
 
@@ -410,7 +411,7 @@ function App(): React.JSX.Element {
         <div className="susi-header">
           <img src={susiAvatar} alt="susAI Assistant" className="susi-avatar" />
           <div className="susi-info">
-            <span className="susi-name">susAI</span>
+            <img src={susAILogo} alt="susAI" className="susi-logo" />
             <span className="susi-role">Interview Assistant</span>
           </div>
         </div>
