@@ -172,6 +172,9 @@ app.post('/agent/final-assessment', async (req: Request, res: Response) => {
     const unclearCount = assistantMessages.filter(m => m.content.includes('🟡')).length;
     const mismatchCount = assistantMessages.filter(m => m.content.includes('⚠️')).length;
 
+    // Get user transcripts only (applicant responses)
+    const userTranscripts = messageHistory.filter(m => m.role === 'user').map(m => m.content);
+
     const assessmentPrompt = `You are an expert HR consultant providing a final candidate assessment.
 
 ### APPLICANT CV
@@ -189,21 +192,19 @@ ${conversationHistory.map(m => `[${m.role.toUpperCase()}]: ${m.content}`).join('
 - Unclear responses (🟡): ${unclearCount}
 - CV mismatches (⚠️): ${mismatchCount}
 
-Provide a final assessment with these sections:
+Provide a final assessment with these sections (NO SCORES - due to data protection):
 
-**Authenticity Score**: X/100 (based on detection summary)
+**Summary**: Brief overview of the interview and key observations about the candidate's responses.
 
-**CV Alignment**: X/100 (how well answers matched stated experience)
-
-**Role Fit**: Brief analysis of candidate vs requirements
+**Role Fit**: Brief analysis of how the candidate matches the role requirements.
 
 **AI Usage Assessment**: 🟢 LOW SUSPICION | 🟡 MODERATE SUSPICION | 🔴 HIGH SUSPICION
-(with brief justification)
+(with brief justification based on response patterns)
 
 **Recommendation**: ✅ HIRE | ⚠️ PROCEED WITH CAUTION | ❌ DO NOT HIRE
 (with 1-2 sentence justification)
 
-Be concise and direct. No lengthy explanations.`;
+Be concise and direct. Do NOT include numerical scores.`;
 
     const result = await generateText({
       model: cerebras('gpt-oss-120b'),
@@ -214,6 +215,7 @@ Be concise and direct. No lengthy explanations.`;
     
     res.status(200).json({ 
       assessment: result.text,
+      transcript: userTranscripts,
       stats: {
         totalResponses: assistantMessages.length,
         authentic: authenticCount,
