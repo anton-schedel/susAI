@@ -68,9 +68,29 @@ code {
   flex-direction: column;
   gap: 0;
   text-align: left;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   transform-origin: top center;
+}
+
+/* Custom scrollbar for assistant card */
+.assistant-card::-webkit-scrollbar {
+  width: 6px;
+}
+
+.assistant-card::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.assistant-card::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.assistant-card::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .assistant-card:hover {
