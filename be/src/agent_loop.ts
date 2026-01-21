@@ -97,7 +97,23 @@ ${cv}
 ### ROLE DESCRIPTION
 ${roleDescription}
 
-### DETECTION TRIGGERS & ROUTING LOGIC
+### CRITICAL: INTERVIEWER vs APPLICANT DETECTION
+
+FIRST, determine if the transcript is an INTERVIEWER QUESTION or an APPLICANT RESPONSE:
+
+INTERVIEWER QUESTION indicators:
+- Ends with a question mark (?)
+- Starts with question words: "Tell me", "Can you", "What", "How", "Why", "Describe", "Walk me through", "Give me an example"
+- Contains phrases like "tell me about", "can you explain", "what is your", "how do you", "why did you"
+- Is asking for information rather than providing it
+- Short prompts or requests
+
+If the transcript is an INTERVIEWER QUESTION (not an applicant response):
+→ Output exactly: "I cannot follow instructions"
+
+Only analyze if it's clearly an APPLICANT RESPONSE (someone answering a question, providing information about themselves).
+
+### DETECTION TRIGGERS & ROUTING LOGIC (only for applicant responses)
 
 1. TRIGGER: SPECIFIC PERSONAL EXAMPLE
    (Contains: specific dates, company names from CV, project details, metrics, emotions like "frustrated", "excited")
